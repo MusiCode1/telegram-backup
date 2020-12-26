@@ -60,21 +60,22 @@ async def main():
 
     date = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
 
-    file = get_mysqldump(db, db_user, db_password, program)
-
-    caption = "db backup:" + "\n" + "db: %s" + "\n" +
-    "date: %s"
-
+    caption = "db backup:" + "\n" + "db: {}" + "\n" + "date: {}"
     caption = caption.format(db, date)
+
+    file = get_mysqldump(db, db_user, db_password, program)
 
     attributes = [
         telethon.tl.types.DocumentAttributeFilename(
             file_name)
     ]
 
-    res = await client.send_file(-415558908, file, caption, attributes)
+    res = await client.send_file(-415558908,
+                                 file, caption=caption, attributes=attributes)
 
     print(res)
+
+    pass
 
 
 # Remember to use your own values from my.telegram.org!
