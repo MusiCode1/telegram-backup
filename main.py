@@ -11,13 +11,23 @@ import datetime
 
 load_dotenv()
 
+db = os.getenv("db")
+db_user = os.getenv("db_user")
+db_password = os.getenv("db_password")
+program = os.getenv("program")
+
+api_id = os.getenv("api_id")
+api_hash = os.getenv("api_hash")
+
+entity = os.getenv("entity")
+
 
 def get_mysqldump(db, user="root", password=None, program="mysqldump"):
 
     def exec():
 
         if password is not None:
-            local_password = "-p"+password
+            local_password = "-p" + password
 
         else:
             local_password = ""
@@ -50,11 +60,6 @@ def get_mysqldump(db, user="root", password=None, program="mysqldump"):
 
 async def main():
 
-    db = os.getenv("db")
-    db_user = os.getenv("db_user")
-    db_password = os.getenv("db_password")
-    program = os.getenv("program")
-
     file_name = datetime.datetime.now().strftime("%d-%m-%Y_%H-%M")
     file_name = "backup_" + file_name + ".sql.gzip"
 
@@ -70,7 +75,7 @@ async def main():
             file_name)
     ]
 
-    res = await client.send_file(-415558908,
+    res = await client.send_file(entity,
                                  file, caption=caption, attributes=attributes)
 
     print(res)
@@ -79,8 +84,6 @@ async def main():
 
 
 # Remember to use your own values from my.telegram.org!
-api_id = os.getenv("api_id")
-api_hash = os.getenv("api_hash")
 client = TelegramClient('token', api_id, api_hash)
 with client:
     client.loop.run_until_complete(main())
