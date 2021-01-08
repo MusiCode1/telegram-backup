@@ -19,11 +19,6 @@ chunk_size_max = 1024 * 1024 * 1024 * 2
 date = datetime.datetime.now().strftime("%d-%m-%Y_%H-%M")
 file_name = "backup_" + date + ".sql"
 
-db = os.getenv("db")
-db_user = os.getenv("db_user")
-db_password = os.getenv("db_password")
-program = os.getenv("program")
-
 path = os.getenv("path")
 
 api_id = os.getenv("api_id")
@@ -44,6 +39,8 @@ class upload_mysqldump_to_tg:
 
         arg = [data["program"], "-u", data["user"],
                local_password, data["db"]]
+        
+        print("get mysqldump...")
 
         self.p = subprocess.Popen(arg, stdout=PIPE, stdin=PIPE, stderr=PIPE)
 
@@ -120,5 +117,9 @@ class upload_mysqldump_to_tg:
         with self.client:
             self.client.loop.run_until_complete(self.upload())
 
+db = os.getenv("db")
+db_user = os.getenv("db_user")
+db_password = os.getenv("db_password")
+program = os.getenv("program")
 
 upload_mysqldump_to_tg(db, db_user, db_password, program)
