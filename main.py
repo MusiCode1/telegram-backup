@@ -44,6 +44,11 @@ class upload_mysqldump_to_tg:
 
         self.p = subprocess.Popen(arg, stdout=PIPE, stdin=PIPE, stderr=PIPE)
 
+        out, error = self.p.communicate()
+
+        if error:
+            raise Exception(error.decode())
+
     def gzip_compress(self):
 
         def get_file_name():
@@ -58,15 +63,15 @@ class upload_mysqldump_to_tg:
             with gzip.GzipFile(file_name, "wb", fileobj=stream) as w_gz:
                 for chunk in iter(lambda:  p.read(chunk_size), b''):
 
-                    chunk = chunk.decode("utf-8")
-                    chunk = chunk.encode()
-
                     if not file or file.tell() >= chunk_size_max:
                         if file:
                             file.close()
                         self.file_num += 1
                         file = open(get_file_name(), "wb")
                         self.file_list.append(get_file_name())
+                    
+                    chunk = chunk.decode("utf-8")
+                    chunk = chunk.encode()
 
                     w_gz.write(chunk)
                     w_gz.flush()
