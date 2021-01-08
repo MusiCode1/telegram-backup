@@ -17,7 +17,7 @@ chunk_size = 1024 * 16
 chunk_size_max = 1024 * 1024 * 1024 * 2
 
 date = datetime.datetime.now().strftime("%d-%m-%Y_%H-%M")
-file_name = "backup_" + date + ".sql"
+file_name = "backup." + date + ".sql"
 
 path = os.getenv("path")
 

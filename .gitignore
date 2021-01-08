@@ -4,3 +4,4 @@
 venv
 *.session
 .vscode
+backup.*
