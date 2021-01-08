@@ -30,7 +30,7 @@ api_hash = os.getenv("api_hash")
 entity = int(os.getenv("entity"))
 
 
-class get_mysqldump:
+class upload_mysqldump_to_tg:
 
     def exec(self, data):
 
@@ -60,7 +60,6 @@ class get_mysqldump:
                 for chunk in iter(lambda:  p.read(chunk_size), b''):
 
                     chunk = chunk.decode("utf-8")
-                    # print(chunk)
                     chunk = chunk.encode()
 
                     if not file or file.tell() >= chunk_size_max:
@@ -68,6 +67,7 @@ class get_mysqldump:
                             file.close()
                         self.file_num += 1
                         file = open(get_file_name(), "wb")
+                        self.file_list.append(get_file_name())
 
                     w_gz.write(chunk)
                     w_gz.flush()
@@ -89,26 +89,24 @@ class get_mysqldump:
             print('Downloaded', current, 'out of', total,
                   'bytes: {:.2%}'.format(current / total))
 
-        file_list = []
-
         if self.file_num < 2:
-            file = file_name + ".gz"
-            os.rename(file + ".001", file)
-            file_list.append(file)
-        else:
-            for index in range(1, self.file_num + 1):
-                file_list.append(file_name + ".gz." + str(index).rjust(3, "0"))
+            file = self.file_list[0]
+            new_file = file.replace(".001", "")
 
-        res = await self.client.send_file(entity, file_list,
+            os.rename(file, new_file)
+            self.file_list[0] = new_file
+
+        res = await self.client.send_file(entity, self.file_list,
                                           progress_callback=callback)
 
-        for file in file_list:
+        for file in self.file_list:
             os.remove(file)
 
     def __init__(self, db, user="root", password=None, program="mysqldump"):
 
         self.file_num = 0
         self.p = ""
+        self.file_list = []
 
         self.exec({"db": db, "user": user,
                    "password": password, "program": program})
@@ -121,4 +119,4 @@ class get_mysqldump:
             self.client.loop.run_until_complete(self.upload())
 
 
-get_mysqldump(db, db_user, db_password, program)
+upload_mysqldump_to_tg(db, db_user, db_password, program)
