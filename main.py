@@ -2,88 +2,123 @@ from telethon import TelegramClient
 from dotenv import load_dotenv
 from subprocess import PIPE
 import subprocess
-import os
-import gzip
-import io
 import telethon
 import datetime
+import asyncio
+import random
 
+import gzip
+import os
+import io
 
-load_dotenv()
+chunk_size = 1024 * 16
+chunk_size_max = 1024 * 1024 * 1024 * 2
+
+date = datetime.datetime.now().strftime("%d-%m-%Y_%H-%M")
+file_name = "backup_" + date + ".sql"
 
 db = os.getenv("db")
 db_user = os.getenv("db_user")
 db_password = os.getenv("db_password")
 program = os.getenv("program")
 
+path = os.getenv("path")
+
 api_id = os.getenv("api_id")
 api_hash = os.getenv("api_hash")
 
-entity = os.getenv("entity")
+entity = int(os.getenv("entity"))
 
 
-def get_mysqldump(db, user="root", password=None, program="mysqldump"):
+class get_mysqldump:
 
-    def exec():
+    def exec(self, data):
 
-        if password is not None:
-            local_password = "-p" + password
+        if data["password"] is not None:
+            local_password = "-p" + data["password"]
 
         else:
             local_password = ""
 
-        arg = [program, "-u", user,
-               local_password, db]
+        arg = [data["program"], "-u", data["user"],
+               local_password, data["db"]]
 
-        p = subprocess.Popen(arg, stdout=PIPE, stdin=PIPE, stderr=PIPE)
-        # p.wait()
+        self.p = subprocess.Popen(arg, stdout=PIPE, stdin=PIPE, stderr=PIPE)
 
-        output = p.stdout.read()
-        output = output.decode("utf-8")
-        output = output.encode()
+    def gzip_compress(self):
 
-        return output
+        def get_file_name():
+            return file_name + ".gz." + str(self.file_num).rjust(3, "0")
 
-    def gzip_compress(data):
-        file = io.BytesIO()
+        p = self.p.stdout
 
-        with gzip.GzipFile("backup.sql", "wb", fileobj=file) as f:
-            f.write(data)
-            f.close()
+        with io.BytesIO() as stream:
 
-        return file.getvalue()
+            file = ""
+            i = 0
+            with gzip.GzipFile(file_name, "wb", fileobj=stream) as w_gz:
+                for chunk in iter(lambda:  p.read(chunk_size), b''):
 
-    data = exec()
-    data = gzip_compress(data)
-    return data
+                    chunk = chunk.decode("utf-8")
+                    # print(chunk)
+                    chunk = chunk.encode()
+
+                    if not file or file.tell() >= chunk_size_max:
+                        if file:
+                            file.close()
+                        self.file_num += 1
+                        file = open(get_file_name(), "wb")
+
+                    w_gz.write(chunk)
+                    w_gz.flush()
+
+                    file.write(stream.getvalue())
+                    stream.seek(0)
+                    stream.truncate(0)
+
+                    i += len(chunk)
+                    if not i % (1024*512):
+                        print(i/1024/1024)
+                w_gz.close()
+                file.write(stream.getvalue())
+                file.close()
+
+    async def upload(self):
+
+        def callback(current, total):
+            print('Downloaded', current, 'out of', total,
+                  'bytes: {:.2%}'.format(current / total))
+
+        file_list = []
+
+        if self.file_num < 2:
+            file = file_name + ".gz"
+            os.rename(file + ".001", file)
+            file_list.append(file)
+        else:
+            for index in range(1, self.file_num + 1):
+                file_list.append(file_name + ".gz." + str(index).rjust(3, "0"))
+
+        res = await self.client.send_file(entity, file_list,
+                                          progress_callback=callback)
+
+        for file in file_list:
+            os.remove(file)
+
+    def __init__(self, db, user="root", password=None, program="mysqldump"):
+
+        self.file_num = 0
+        self.p = ""
+
+        self.exec({"db": db, "user": user,
+                   "password": password, "program": program})
+        self.gzip_compress()
+
+        self.client = TelegramClient("token", api_id, api_hash)
+        self.client.start()
+
+        with self.client:
+            self.client.loop.run_until_complete(self.upload())
 
 
-async def main():
-
-    file_name = datetime.datetime.now().strftime("%d-%m-%Y_%H-%M")
-    file_name = "backup_" + file_name + ".sql.gzip"
-
-    date = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
-
-    caption = "db backup:" + "\n" + "db: {}" + "\n" + "date: {}"
-    caption = caption.format(db, date)
-
-    file = get_mysqldump(db, db_user, db_password, program)
-
-    attributes = [
-        telethon.tl.types.DocumentAttributeFilename(
-            file_name)
-    ]
-
-    res = await client.send_file(entity,
-                                 file, caption=caption, attributes=attributes)
-
-    print(res)
-
-    pass
-
-
-# Remember to use your own values from my.telegram.org!
-client = TelegramClient('token', api_id, api_hash)
-with client:
-    client.loop.run_until_complete(main())
+get_mysqldump(db, db_user, db_password, program)
