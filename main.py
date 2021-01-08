@@ -11,6 +11,8 @@ import gzip
 import os
 import io
 
+load_dotenv()
+
 chunk_size = 1024 * 16
 chunk_size_max = 1024 * 1024 * 1024 * 2
 
