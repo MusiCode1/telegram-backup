@@ -49,9 +49,11 @@ class upload_mysqldump_to_tg:
 
         self.p = Popen(arg, stdout=PIPE, stdin=PIPE, stderr=PIPE)
 
-        time.sleep(0.001)
+        time.sleep(10)
 
-        if self.p._closed_child_pipe_fds:
+        poll = self.p.poll()
+
+        if poll is not None:
             raise Exception(self.p.stderr.read().decode())
 
     def gzip_compress(self):
