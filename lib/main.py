@@ -49,7 +49,7 @@ class upload_mysqldump_to_tg:
 
         self.p = Popen(arg, stdout=PIPE, stdin=PIPE, stderr=PIPE)
 
-        time.sleep(10)
+        time.sleep(5)
 
         poll = self.p.poll()
 
@@ -98,7 +98,7 @@ class upload_mysqldump_to_tg:
 
         def callback(current, total):
             print('Downloaded', current, 'out of', total,
-                  'bytes: {:.2%}'.format(size(current / total)))
+                  'bytes: {:.2%}'.format(sizeof_fmt(current / total)))
 
         if self.file_num < 2:
             file = self.file_list[0]
@@ -107,13 +107,20 @@ class upload_mysqldump_to_tg:
             os.rename(file, new_file)
             self.file_list[0] = new_file
 
-        res = await self.client.send_file(tg["entity"], self.file_list,
-                                          progress_callback=callback)
+        caption = "**Name:** " + self.name \
+            + "\n" + "**DataBase source:** " + self.db \
+            + "\n" + "**Date:** " + \
+            datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
+
+        res = await self.client.send_file(
+            tg["entity"], self.file_list,
+            progress_callback=callback,
+            caption=caption)
 
         for file in self.file_list:
             os.remove(file)
 
-    def __init__(self, mysqldump, tg):
+    def __init__(self, name, mysqldump, tg):
 
         if not mysqldump["program"]:
             mysqldump["program"] = "mysqldump"
@@ -127,6 +134,8 @@ class upload_mysqldump_to_tg:
         self.file_num = 0
         self.p = ""
         self.file_list = []
+        self.db = mysqldump["db"]
+        self.name = name
 
         self.exec({
             "db": mysqldump["db"],

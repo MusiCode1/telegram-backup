@@ -1,6 +1,8 @@
 from lib.main import upload_mysqldump_to_tg
 import os
 
+name = os.getenv("name")
+
 mysqldump = {
     "path": os.getenv("path"),
     "db": os.getenv("db"),
@@ -17,4 +19,4 @@ tg = {
 }
 
 
-upload_mysqldump_to_tg(mysqldump, tg)
+upload_mysqldump_to_tg(name, mysqldump, tg)
