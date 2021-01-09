@@ -1,6 +1,8 @@
 from telethon import TelegramClient
+from hurry.filesize import size
 from dotenv import load_dotenv
 from subprocess import PIPE
+
 import subprocess
 import telethon
 import datetime
@@ -75,7 +77,8 @@ class upload_mysqldump_to_tg:
 
                     i += len(chunk)
                     if not i % (1024*512):
-                        print(i/1024/1024)
+                        print("source", size(i))
+                        print("destination", size(file.tell()))
 
                 w_gz.close()
                 file.write(stream.getvalue())
@@ -85,7 +88,7 @@ class upload_mysqldump_to_tg:
 
         def callback(current, total):
             print('Downloaded', current, 'out of', total,
-                  'bytes: {:.2%}'.format(current / total))
+                  'bytes: {:.2%}'.format(size(current / total)))
 
         if self.file_num < 2:
             file = self.file_list[0]
