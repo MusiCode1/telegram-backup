@@ -22,15 +22,14 @@ date = datetime.datetime.now().strftime("%d-%m-%Y_%H-%M")
 file_name = "backup." + date + ".sql"
 
 
-def sizeof_fmt(num, suffix='B'):
-    for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
-        if abs(num) < 1024.0:
-            return "%3.1f%s%s" % (num, unit, suffix)
-        num /= 1024.0
-    return "%.1f%s%s" % (num, 'Yi', suffix)
-
-
 class upload_mysqldump_to_tg:
+
+    def size(num, suffix='B'):
+        for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
+            if abs(num) < 1024.0:
+                return "%3.1f%s%s" % (num, unit, suffix)
+            num /= 1024.0
+        return "%.1f%s%s" % (num, 'Yi', suffix)
 
     def exec(self, data):
 
@@ -87,8 +86,8 @@ class upload_mysqldump_to_tg:
 
                     i += len(chunk)
                     if not i % (1024*512):
-                        print("source", sizeof_fmt(i), "|",
-                              "destination", sizeof_fmt(file.tell()))
+                        print("source", size(i), "|",
+                              "destination", size(file.tell()))
 
                 w_gz.close()
                 file.write(stream.getvalue())
@@ -98,7 +97,7 @@ class upload_mysqldump_to_tg:
 
         def callback(current, total):
             print('Downloaded', current, 'out of', total,
-                  'bytes: {:.2%}'.format(sizeof_fmt(current / total)))
+                  'bytes: {:.2%}'.format(size(current / total)))
 
         if self.file_num < 2:
             file = self.file_list[0]
@@ -107,7 +106,7 @@ class upload_mysqldump_to_tg:
             os.rename(file, new_file)
             self.file_list[0] = new_file
 
-        caption = "**Name:** " + self.name \
+        caption = "**Name:** " + str(self.name) \
             + "\n" + "**DataBase source:** " + self.db \
             + "\n" + "**Date:** " + \
             datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
@@ -121,6 +120,9 @@ class upload_mysqldump_to_tg:
             os.remove(file)
 
     def __init__(self, name, mysqldump, tg):
+
+        if not mysqldump["db"]:
+            raise Exception("no dataBase parameter")
 
         if not mysqldump["program"]:
             mysqldump["program"] = "mysqldump"
