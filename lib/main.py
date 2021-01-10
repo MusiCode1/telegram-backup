@@ -24,7 +24,7 @@ file_name = "backup." + date + ".sql"
 
 class upload_mysqldump_to_tg:
 
-    def size(num, suffix='B'):
+    def size(self, num, suffix='B'):
         for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
             if abs(num) < 1024.0:
                 return "%3.1f%s%s" % (num, unit, suffix)
@@ -86,8 +86,8 @@ class upload_mysqldump_to_tg:
 
                     i += len(chunk)
                     if not i % (1024*512):
-                        print("source", size(i), "|",
-                              "destination", size(file.tell()))
+                        print("source", self.size(i), "|",
+                              "destination", self.size(file.tell()))
 
                 w_gz.close()
                 file.write(stream.getvalue())
@@ -97,7 +97,7 @@ class upload_mysqldump_to_tg:
 
         def callback(current, total):
             print('Downloaded', current, 'out of', total,
-                  'bytes: {:.2%}'.format(size(current / total)))
+                  'bytes: {:.2%}'.format(self.size(current / total)))
 
         if self.file_num < 2:
             file = self.file_list[0]
