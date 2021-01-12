@@ -1,6 +1,6 @@
-# /bin/bash
-# export PATH=/usr/local/bin:$PATH
-export ~/.local/bin/pipenv
+# /bin/bash -l
+# 0 6 * * * ./cron-script.sh
+export ~/.local/bin
 export LC_ALL=C.UTF-8
 export LANG=C.UTF-8
 
