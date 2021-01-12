@@ -1,6 +1,8 @@
 # telegram-babkup
 <div dir="rtl" text-align="right">
 גיבוי MySQL לענן של טלגרם
+- תמיכה בפיצול קבצים מעבר ל-2 ג'יגה
+
 
 דוגמא לשימוש:
 <div dir="ltr" text-align="left">

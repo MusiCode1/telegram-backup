@@ -1,4 +1,4 @@
-from telethon import TelegramClient
+from telethon import TelegramClient, functions, types
 from dotenv import load_dotenv
 from subprocess import PIPE, Popen
 
@@ -60,6 +60,12 @@ class upload_mysqldump_to_tg:
         def get_file_name():
             return file_name + ".gz." + str(self.file_num).rjust(3, "0")
 
+        def open_file():
+            self.file_num += 1
+            file = get_file_name()
+            self.file_list.append(file)
+            return open(file, "wb")
+
         p = self.p.stdout
 
         with io.BytesIO() as stream:
@@ -73,21 +79,22 @@ class upload_mysqldump_to_tg:
                     if not file or file.tell() >= chunk_size_max:
                         if file:
                             file.close()
-                        self.file_num += 1
-                        file = open(get_file_name(), "wb")
-                        self.file_list.append(get_file_name())
+
+                        file = open_file()
 
                     w_gz.write(chunk)
                     w_gz.flush()
 
                     file.write(stream.getvalue())
-                    stream.seek(0)
-                    stream.truncate(0)
 
                     i += len(chunk)
                     if not i % (1024*512):
                         print("source", self.size(i), "|",
                               "destination", self.size(file.tell()))
+                        # print(chunk[0:50].decode())
+
+                    stream.seek(0)
+                    stream.truncate(0)
 
                 w_gz.close()
                 file.write(stream.getvalue())
@@ -95,16 +102,16 @@ class upload_mysqldump_to_tg:
 
     async def upload(self, tg):
 
-        def callback(current, total):
-            print('Downloaded', current, 'out of', total,
-                  'bytes: {:.2%}'.format(self.size(current / total)))
+        def progress_callback(current, total):
+            print('Uploaded', self.size(current), 'out of', total,
+                  'bytes: {:.2%}'.format(current / total))
 
         if self.file_num < 2:
             file = self.file_list[0]
             new_file = file.replace(".001", "")
 
             os.rename(file, new_file)
-            self.file_list[0] = new_file
+            self.file_list = new_file
 
         caption = "**Name:** " + str(self.name) \
             + "\n" + "**DataBase source:** " + self.db \
@@ -113,11 +120,14 @@ class upload_mysqldump_to_tg:
 
         res = await self.client.send_file(
             tg["entity"], self.file_list,
-            progress_callback=callback,
-            caption=caption)
+            caption=caption,
+            progress_callback=progress_callback)
 
-        for file in self.file_list:
-            os.remove(file)
+        if(type(self.file_list) is str):
+            os.remove(self.file_list)
+        else:
+            for file in self.file_list:
+                os.remove(file)
 
     def __init__(self, name, mysqldump, tg):
 
@@ -139,6 +149,16 @@ class upload_mysqldump_to_tg:
         self.db = mysqldump["db"]
         self.name = name
 
+        self.client = TelegramClient("token", tg["api_id"], tg["api_hash"])
+        self.client.start()
+
+        res = self.client(functions.messages.SetTypingRequest(
+            peer=tg["entity"],
+            action=types.SendMessageUploadDocumentAction(0)
+        ))
+
+        print(res)
+
         self.exec({
             "db": mysqldump["db"],
             "db_user": mysqldump["db_user"],
@@ -147,9 +167,6 @@ class upload_mysqldump_to_tg:
         })
 
         self.gzip_compress()
-
-        self.client = TelegramClient("token", tg["api_id"], tg["api_hash"])
-        self.client.start()
 
         with self.client:
             self.client.loop.run_until_complete(self.upload(tg))

@@ -2,6 +2,7 @@
 .env2
 .idea
 venv
-*.session
+token.*
 .vscode
 backup.*
+pilot
