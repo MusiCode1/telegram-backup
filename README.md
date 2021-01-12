@@ -1,4 +1,4 @@
-# telegram-babkup
+# telegram-backup
 <div dir="rtl" text-align="right">
 גיבוי MySQL לענן של טלגרם
 - תמיכה בפיצול קבצים מעבר ל-2 ג'יגה
