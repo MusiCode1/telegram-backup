@@ -3,4 +3,4 @@ SCRIPTPATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
 cd $SCRIPTPATH
 
-~/.local/bin/pipenv python main.py
+~/.local/bin/pipenv shell python main.py
