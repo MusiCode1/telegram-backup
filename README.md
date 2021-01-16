@@ -1,10 +1,23 @@
 # telegram-backup
 <div dir="rtl" text-align="right">
-גיבוי MySQL לענן של טלגרם
-- תמיכה בפיצול קבצים מעבר ל-2 ג'יגה
 
+גיבוי MySQL לענן של טלגרם.
+ - דחיסת הקבצים ב-gzip.
+ - תמיכה בפיצול קבצים מעבר ל-2 ג'יגה.
+ - עובד באמצעות הזרמה - לא תופס הרבה מקום בזיכרון ה-Ram
+
+הקבצים נשמרים בצורה זמנית על הדיסק הקשיח, היות ואי אפשר להעלות לטלגרם קבצים בלי לדעת את גודלם המדוייק.
+
+התקנה (שכפול הפרוייקט):
+
+<div dir="ltr" text-align="left">
+
+    git clone https://github.com/MusiCode1/telegram-backup.git
+
+<div dir="rtl" text-align="right">
 
 דוגמא לשימוש:
+
 <div dir="ltr" text-align="left">
 
     from lib.main import upload_mysqldump_to_tg
