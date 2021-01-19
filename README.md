@@ -1,15 +1,16 @@
 # telegram-backup
 <div dir="rtl" text-align="right">
 
-גיבוי MySQL לענן של טלגרם.
+גיבוי מסד נתונים MySQL שלם, לערוץ או קבוצת טלגרם.
+כך ניתן לגבות את הקבצים לענן ללא הגבלה של גיבויים, וקבצים עד 2 GB.
  - דחיסת הקבצים ב-gzip.
  - תמיכה בפיצול קבצים מעבר ל-2 ג'יגה.
- - עובד באמצעות הזרמה - לא תופס הרבה מקום בזיכרון ה-Ram
+ - עובד באמצעות הזרמה - לא תופס הרבה מקום בזיכרון ה-Ram.
 
 הקבצים נשמרים בצורה זמנית על הדיסק הקשיח, היות ואי אפשר להעלות לטלגרם קבצים בלי לדעת את גודלם המדוייק.
 
 ## התקנת תלויות:
- - פייתון
+ - פייתון 3.9
  - פייתון-ENV
  - פייתון-pip
  - pipenv
@@ -69,5 +70,23 @@
 <div dir="ltr" text-align="left">
 
     pipenv shell
-
     python ./main.py
+
+<div dir="rtl" text-align="right">
+
+## קרון - Cron-jobs
+אם רוצים להכניס לקרון, יש סקריפט לזה: `cron-script.sh`. לדוגמא: אם רוצים בשש בבוקר, אז:
+
+<div dir="ltr" text-align="left">
+
+    # m h  dom mon dow   command
+      0 6  *   *   *     /home/user/telegram-babkup/cron-script.sh
+
+<div dir="rtl" text-align="right">
+
+ואפשר גם לשמור לוג:
+
+<div dir="ltr" text-align="left">
+
+    # m h  dom mon dow   command
+      0 6  *   *   *     /home/user/telegram-babkup/cron-script.sh >> /home/user/telegram-babkup/log.txt 2>&1
