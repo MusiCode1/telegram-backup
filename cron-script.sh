@@ -6,4 +6,4 @@ export LANG=C.UTF-8
 
 file=./main.py
 
-pipenv run python $file
+pipenv run run_backup
