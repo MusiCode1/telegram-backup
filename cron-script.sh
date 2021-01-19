@@ -4,6 +4,11 @@ export PATH=$HOME/.local/bin:$PATH
 export LC_ALL=C.UTF-8
 export LANG=C.UTF-8
 
-file=./main.py
+SCRIPTPATH="$(
+    cd "$(dirname "$0")" >/dev/null 2>&1
+    pwd -P
+)"
+
+cd $SCRIPTPATH
 
 pipenv run run_backup
