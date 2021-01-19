@@ -1,5 +1,5 @@
 # /bin/bash -l
-# 0 6 * * * .../cron-script.sh >> .../log.txt
+# 0 6 * * * .../cron-script.sh >> .../log.txt 2>&1
 export PATH=$HOME/.local/bin:$PATH
 export LC_ALL=C.UTF-8
 export LANG=C.UTF-8
