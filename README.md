@@ -8,7 +8,19 @@
 
 הקבצים נשמרים בצורה זמנית על הדיסק הקשיח, היות ואי אפשר להעלות לטלגרם קבצים בלי לדעת את גודלם המדוייק.
 
-התקנה (שכפול הפרוייקט):
+## התקנת תלויות:
+ - פייתון
+ - פייתון-ENV
+ - פייתון-pip
+ - pipenv
+
+ <div dir="ltr" text-align="left">
+
+    pip install pipenv
+
+<div dir="rtl" text-align="right">
+
+## התקנה (שכפול הפרוייקט):
 
 <div dir="ltr" text-align="left">
 
@@ -16,29 +28,46 @@
 
 <div dir="rtl" text-align="right">
 
-דוגמא לשימוש:
+התקנת סביבת עבודה של pipenv:
 
 <div dir="ltr" text-align="left">
 
-    from lib.main import upload_mysqldump_to_tg
-    import os
+    pipenv install
 
-    name = os.getenv("name")
+<div dir="rtl" text-align="right">
 
-    mysqldump = {
-        "path": os.getenv("path"),
-        "db": os.getenv("db"),
-        "db_user": os.getenv("db_user"),
-        "db_password": os.getenv("db_password"),
-        "program": os.getenv("program")
-    }
+## שימוש
 
-    tg = {
-        "api_id": os.getenv("api_id"),
-        "api_hash": os.getenv("api_hash"),
+הכנסת הערכים של הריצה:
 
-        "entity": int(os.getenv("entity"))
-    }
+<div dir="ltr" text-align="left">
 
+    cp .env-exemple .env
 
-    upload_mysqldump_to_tg(name, mysqldump, tg)
+<div dir="rtl" text-align="right">
+
+יש לשנות את הפרטים בקובץ `.env`.
+
+<div dir="ltr" text-align="left">
+
+    api_id=156
+    api_hash=ytn86ty9umj98u
+
+    db=db_name
+    db_user=root
+    db_password=1234
+
+    program=C:/xampp/mysql/bin/mysqldump
+    entity=5678
+
+    name=my name
+
+<div dir="rtl" text-align="right">
+
+הרצה:
+
+<div dir="ltr" text-align="left">
+
+    pipenv shell
+
+    python ./main.py
